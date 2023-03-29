@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Modal from "./components/Modal/Modal";
 import Button from "./components/Button/Button";
@@ -7,6 +7,7 @@ import TaskList from "./components/TaskList/TaskList";
 function App() {
   const [show, setShow] = useState(false);
   const [newTask, setNewTask] = useState("");
+  const [currentEdit, setCurrentEdit] = useState();
   const [tasks, setTasks] = useState([
     {
       id: 1,
@@ -33,13 +34,12 @@ function App() {
 
   const handleChangeCheck = (event) => {
     setNewTask(event.target.value);
-    console.log(newTask, "new task");
   };
   const handleAddTask = () => {
     setTasks((prevState) => [
       ...prevState,
       {
-        id: Math.floor(Math.random * 100),
+        id: Math.floor(Math.random() * 1000),
         title: newTask,
         completed: false,
       },
@@ -48,10 +48,36 @@ function App() {
   };
 
   const handleDelete = (id) => {
-    const filtered = List.filter((tasks) => tasks.id !== id);
-    setNewTask([...filtered]);
+    const deleted = tasks.filter((el) => el.id !== id);
+    setTasks([...deleted]);
     /// filter
   };
+
+  const handleDone = (id) => {
+    // const currentIndex = tasks.findIndex(task => task.id === id )
+    tasks.map((task) => {
+      if (task.id === id) {
+        return (task.completed = !task.completed);
+      }
+      return task;
+    });
+    setTasks([...tasks]);
+  };
+  const handleEdit = (editTodo) => {
+    const editList = tasks.map((task) => {
+      if (task.id === editTodo.id) {
+        return editTodo;
+      }
+      return task;
+    });
+    setTasks([...editList]);
+    setCurrentEdit();
+  };
+
+  // useEffect(() => {
+  //   console.log('log useEffect');
+  // }, [ tasks,show ])
+
   return (
     <div className="App">
       {show && (
@@ -65,7 +91,13 @@ function App() {
       <Button handleClick={handleShow}>Открыть модалку</Button>
 
       {/* task list */}
-      <TaskList handleDelete={handleDelete} list={tasks} />
+      <TaskList
+        handleDelete={handleDelete}
+        handleDone={handleDone}
+        handleEdit={handleEdit}
+        list={tasks}
+        currentEdit={currentEdit}
+      />
     </div>
   );
 }

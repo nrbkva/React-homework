@@ -1,13 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import TodoCard from "../TodoCard/TodoCard";
-const TaskList = ({ list, handleDelete }) => {
-  return (
-    <div>
-      {list.map((task) => (
-        <TodoCard handleDelete={handleDelete} key={task.id} task={task} />
-      ))}
-    </div>
-  );
-};
+const TaskList = ({ list, handleDelete, handleDone, handleEdit }) => {
+  const [currentEdit, setCurrentEdit] = useState();
 
+  if (currentEdit) {
+    return (
+      <div>
+        {list.map((task) => (
+          <TodoCard
+            handleDelete={handleDelete}
+            handleDone={handleDone}
+            handleEdit={handleEdit}
+            handleSelectCurrent={setCurrentEdit}
+            iEdit={task.id === currentEdit}
+            key={task.id}
+            task={task}
+          />
+        ))}
+      </div>
+    );
+  }
+};
 export default TaskList;
