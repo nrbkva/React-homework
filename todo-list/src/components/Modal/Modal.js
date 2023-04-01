@@ -6,7 +6,7 @@ import Input from "../Input/Input";
 const Modal = ({ handleShow, handleChangeCheck, handleAdd }) => {
   return (
     <React.Fragment>
-      <div className={classes.modalWrapper}></div>
+      <div className={classes.modalWrapper} onClick={handleShow}></div>
       <div className={classes.modalContent}>
         <Button handleClick={handleShow}>Закрыть модалку</Button>
 

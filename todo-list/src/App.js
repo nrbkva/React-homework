@@ -3,38 +3,22 @@ import "./App.css";
 import Modal from "./components/Modal/Modal";
 import Button from "./components/Button/Button";
 import TaskList from "./components/TaskList/TaskList";
+import ButtonAction from "./components/ButtonAction/ButtonAction";
 
 function App() {
   const [show, setShow] = useState(false);
   const [newTask, setNewTask] = useState("");
-  const [currentEdit, setCurrentEdit] = useState();
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      title: "Coding",
-      completed: false,
-    },
-    {
-      id: 2,
-      title: "Eat",
-      completed: false,
-    },
-    {
-      id: 3,
-      title: "Sleep",
-      completed: false,
-    },
-    {
-      id: 4,
-      title: "Coding",
-      completed: false,
-    },
-  ]);
+  const [tasks, setTasks] = useState([]);
+  const [filterBy, setFilterBy] = useState("all");
+
+  const [TaskList, setTaskList] = useState([]);
+
   const handleShow = () => setShow(!show);
 
   const handleChangeCheck = (event) => {
     setNewTask(event.target.value);
   };
+  // 1.Все таски 2.Выполненные 3.Не выполеннные
   const handleAddTask = () => {
     setTasks((prevState) => [
       ...prevState,
@@ -71,15 +55,52 @@ function App() {
       return task;
     });
     setTasks([...editList]);
-    setCurrentEdit();
   };
 
+  const resultSearch = TaskList.filter((tasks) =>
+    tasks.title.toLowerCase().includes(search.toLowerCase())
+  );
+  const resultFilter =
+    filterBy === "all"
+      ? resultSearch
+      : filterBy === "completed"
+      ? resultSearch.filter((tasks) => tasks.completed)
+      : filterBy === "notCompleted"
+      ? resultSearch.filter((tasks) => !tasks.completed)
+      : null;
+
+  useEffect(() => {
+    const myLocalList = JSON.parse(localStorage.getItem("tasks"));
+    if (myLocalList.length !== 0) {
+      setTasks(myLocalList);
+    }
+  }, []);
+
   // useEffect(() => {
-  //   console.log('log useEffect');
-  // }, [ tasks,show ])
+  //   localStorage.setItem("tasks", JSON.stringify(tasks));
+  // }, [tasks]);
+  useEffect(() => {
+    console.log("render 2");
+    localStorage.setItem("tasks", JSON.stringify(tasks)); // запись
+    return () => {};
+  }, [tasks]);
+
+  const filterTasks = ({ target }) => {
+    setFilterBy(target.value);
+  };
+
+  const clearTask = () => {
+    setTaskList([]);
+    localStorage.clear();
+  };
 
   return (
     <div className="App">
+      <select onChange={filterTasks}>
+        <option value="all">Все</option>
+        <option value="completed">Завршенные</option>
+        <option value="notCompleted">Не завершенные</option>
+      </select>
       {show && (
         <Modal
           handleChangeCheck={handleChangeCheck}
@@ -95,9 +116,9 @@ function App() {
         handleDelete={handleDelete}
         handleDone={handleDone}
         handleEdit={handleEdit}
-        list={tasks}
-        currentEdit={currentEdit}
+        list={resultFilter}
       />
+      <Button onClick={clearTask}>Clear Task</Button>
     </div>
   );
 }
