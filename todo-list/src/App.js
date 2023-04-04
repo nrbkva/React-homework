@@ -4,14 +4,17 @@ import Modal from "./components/Modal/Modal";
 import Button from "./components/Button/Button";
 import TaskList from "./components/TaskList/TaskList";
 import ButtonAction from "./components/ButtonAction/ButtonAction";
+import Pagination from "./components/Pagination/Pagination";
 
 function App() {
   const [show, setShow] = useState(false);
   const [newTask, setNewTask] = useState("");
   const [tasks, setTasks] = useState([]);
-  const [filterBy, setFilterBy] = useState("all");
+  // const [filterBy, setFilterBy] = useState("all");
+  // const [TaskList, setTaskList] = useState([]);
 
-  const [TaskList, setTaskList] = useState([]);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
   const handleShow = () => setShow(!show);
 
@@ -57,17 +60,17 @@ function App() {
     setTasks([...editList]);
   };
 
-  const resultSearch = TaskList.filter((tasks) =>
-    tasks.title.toLowerCase().includes(search.toLowerCase())
-  );
-  const resultFilter =
-    filterBy === "all"
-      ? resultSearch
-      : filterBy === "completed"
-      ? resultSearch.filter((tasks) => tasks.completed)
-      : filterBy === "notCompleted"
-      ? resultSearch.filter((tasks) => !tasks.completed)
-      : null;
+  // const resultSearch = TaskList.filter((tasks) =>
+  //   tasks.title.toLowerCase().includes(search.toLowerCase())
+  // );
+  // const resultFilter =
+  //   filterBy === "all"
+  //     ? resultSearch
+  //     : filterBy === "completed"
+  //     ? resultSearch.filter((tasks) => tasks.completed)
+  //     : filterBy === "notCompleted"
+  //     ? resultSearch.filter((tasks) => !tasks.completed)
+  //     : null;
 
   useEffect(() => {
     const myLocalList = JSON.parse(localStorage.getItem("tasks"));
@@ -76,31 +79,52 @@ function App() {
     }
   }, []);
 
+  const handleNext = () => {
+    setPage((prev) => (prev += 1));
+  };
+
+  const handlePrev = () => {
+    if (page === 1) return;
+    setPage((prev) => (prev -= 1));
+  };
+
+  const fetchTodos = async (url) => {
+    const todos = await fetch(url);
+    console.log(todos, "todo");
+  };
+
+  useEffect(() => {
+    fetchTodos(
+      `https://jsonplaceholder.typicode.com/todos?_limit=${limit}&_start=${page}`
+    );
+    .then((data) => setTasks(data));
+  }, [page]);
+
   // useEffect(() => {
   //   localStorage.setItem("tasks", JSON.stringify(tasks));
   // }, [tasks]);
-  useEffect(() => {
-    console.log("render 2");
-    localStorage.setItem("tasks", JSON.stringify(tasks)); // запись
-    return () => {};
-  }, [tasks]);
+  // useEffect(() => {
+  //   console.log("render 2");
+  //   localStorage.setItem("tasks", JSON.stringify(tasks)); // запись
+  //   return () => {};
+  // }, [tasks]);
 
-  const filterTasks = ({ target }) => {
-    setFilterBy(target.value);
-  };
+  // const filterTasks = ({ target }) => {
+  //   setFilterBy(target.value);
+  // };
 
-  const clearTask = () => {
-    setTaskList([]);
-    localStorage.clear();
-  };
+  // const clearTask = () => {
+  //   setTaskList([]);
+  //   localStorage.clear();
+  // };
 
   return (
     <div className="App">
-      <select onChange={filterTasks}>
+      {/* <select onChange={filterTasks}>
         <option value="all">Все</option>
         <option value="completed">Завршенные</option>
         <option value="notCompleted">Не завершенные</option>
-      </select>
+      </select> */}
       {show && (
         <Modal
           handleChangeCheck={handleChangeCheck}
@@ -116,9 +140,10 @@ function App() {
         handleDelete={handleDelete}
         handleDone={handleDone}
         handleEdit={handleEdit}
-        list={resultFilter}
+        // list={resultFilter}
       />
-      <Button onClick={clearTask}>Clear Task</Button>
+      {/* <Button onClick={clearTask}>Clear Task</Button> */}
+      <Pagination page={page} handleNext={handleNext} handlePrev={handlePrev} />
     </div>
   );
 }
